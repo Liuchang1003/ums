@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付码生成页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#0FC6C2',
+                        neutral: {
+                            100: '#F5F7FA',
+                            200: '#E5E6EB',
+                            300: '#C9CDD4',
+                            400: '#86909C',
+                            500: '#4E5969',
+                            600: '#272E3B',
+                            700: '#1D2129',
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                        'card-hover': '0 8px 30px rgba(0, 0, 0, 0.12)',
+                    }
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .input-focus {
+                @apply ring-2 ring-primary/30 ring-offset-2 ring-offset-white;
+            }
+            .btn-hover {
+                @apply transform hover:scale-[1.02] hover:shadow-lg transition-all duration-300;
+            }
+            .card-animation {
+                @apply transition-all duration-500 ease-in-out;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-neutral-100 min-h-screen flex flex-col">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-comment text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-neutral-700">付款码生成工具</h1>
+            </div>
+            <nav>
+                <!-- <ul class="flex space-x-6">
+                    <li><a href="#" class="text-neutral-500 hover:text-primary transition-colors">首页</a></li>
+                    <li><a href="#" class="text-neutral-500 hover:text-primary transition-colors">文档</a></li>
+                    <li><a href="#" class="text-neutral-500 hover:text-primary transition-colors">关于</a></li>
+                </ul> -->
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要内容区 -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <section class="max-w-3xl mx-auto">
+            <!-- 标题区域 -->
+            <div class="text-center mb-10">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-neutral-700 mb-3">支付即开票码牌生成工具</h2>
+                <p class="text-neutral-500 text-lg max-w-2xl mx-auto">
+                    输入商户编号及终端号，点击按钮，即可在下方区域生成支付码
+                </p>
+            </div>
+
+            <!-- 输入表单 -->
+            <div class="bg-white rounded-xl shadow-card p-6 mb-8 transform hover:shadow-card-hover transition-all duration-300">
+                <form id="inputForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label for="input1" class="block text-sm font-medium text-neutral-700">
+                                <i class="fa fa-pencil-square-o mr-2"></i>商户编号
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-font text-neutral-400"></i>
+                                </div>
+                                <input type="text" id="input1" name="input1" 
+                                    class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:input-focus"
+                                    placeholder="请输入商户编号...">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="input2" class="block text-sm font-medium text-neutral-700">
+                                <i class="fa fa-pencil-square-o mr-2"></i>终端号
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-font text-neutral-400"></i>
+                                </div>
+                                <input type="text" id="input2" name="input2" 
+                                    class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:input-focus"
+                                    placeholder="请输入终端号...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center">
+                        <button type="button" id="submitBtn" 
+                            class="bg-primary hover:bg-primary/90 text-white font-medium py-3 px-8 rounded-lg flex items-center btn-hover">
+                            <i class="fa fa-magic mr-2"></i>
+                            生成二维码
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 结果展示区域 -->
+            <div id="resultContainer" class="hidden bg-white rounded-xl shadow-card p-8 card-animation">
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-semibold text-neutral-700 mb-2">展示结果</h3>
+                    <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
+                </div>
+                
+                <div id="resultContent" class="text-center py-8 text-neutral-700 text-lg">
+                    <!-- 结果将在这里显示 -->
+                </div>
+                
+                <div class="flex justify-center mt-6">
+                    <button id="resetBtn" class="text-neutral-500 hover:text-neutral-700 font-medium py-2 px-6 rounded-lg border border-neutral-300 hover:border-neutral-400 transition-colors flex items-center btn-hover">
+                        <i class="fa fa-refresh mr-2"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+
+            <!-- 空状态提示 -->
+            <div id="emptyState" class="text-center py-16 text-neutral-400">
+                <i class="fa fa-file-text-o text-5xl mb-4"></i>
+                <p class="text-lg">暂无内容，请输入信息并点击按钮</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-neutral-200 py-6">
+        <div class="container mx-auto px-4 text-center text-neutral-500 text-sm">
+            <p>© 支付即开票码牌生成工具 | by liuchang</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const input1 = document.getElementById('input1');
+            const input2 = document.getElementById('input2');
+            const submitBtn = document.getElementById('submitBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultContent = document.getElementById('resultContent');
+            const emptyState = document.getElementById('emptyState');
+
+            // 点击提交按钮
+            submitBtn.addEventListener('click', function() {
+                const value1 = input1.value.trim();
+                const value2 = input2.value.trim();
+               
+                // 验证输入
+                if (!value1 || !value2) {
+                    showNotification('商户编号和终端号均需输入', 'error');
+                    return;
+                }
+
+                // 构建结果HTML
+                let resultHTML = '<div class="space-y-4">';
+                
+                if (value1) {
+                    resultHTML += `
+                        <div class="bg-neutral-100 p-4 rounded-lg text-left card-animation">
+                            <h4 class="font-medium text-neutral-700 mb-2">商户编号:</h4>
+                            <p class="text-neutral-600">${escapeHTML(value1)}</p>
+                        </div>
+                    `;
+                }
+                
+                if (value2) {
+                    resultHTML += `
+                        <div class="bg-neutral-100 p-4 rounded-lg text-left card-animation">
+                            <h4 class="font-medium text-neutral-700 mb-2">终端号:</h4>
+                            <p class="text-neutral-600">${escapeHTML(value2)}</p>
+                        </div>
+                    `;
+                }
+                
+                if (value1 && value2) {
+                    var qrcodeHtml = `https://jx-recycle.chinaums.com/manage/view/tcc/pay?shh=${escapeHTML(value1)}%26zdh=${escapeHTML(value2)}%26ywlxDm=0001`;
+                    resultHTML += `
+                        <div class="bg-primary/5 p-4 rounded-lg text-left card-animation border border-primary/20">
+                            <h4 class="font-medium text-primary mb-2">支付码:</h4>
+                            <img src="https://api.2dcode.biz/v1/create-qr-code?data=${qrcodeHtml}&size=480x480" alt="" title="支付即开票码" />
+                            
+                        </div>
+                    `;
+                }
+                
+                resultHTML += '</div>';
+                
+                // 显示结果
+                resultContent.innerHTML = resultHTML;
+                resultContainer.classList.remove('hidden');
+                resultContainer.classList.add('animate-fadeIn');
+                emptyState.classList.add('hidden');
+                
+                // 滚动到结果区域
+                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // 显示成功通知
+                showNotification('内容已成功展示', 'success');
+            });
+
+            // 点击重置按钮
+            resetBtn.addEventListener('click', function() {
+                input1.value = '';
+                input2.value = '';
+                resultContainer.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                
+                // 显示重置通知
+                showNotification('已重置输入', 'info');
+                
+                // 聚焦到第一个输入框
+                input1.focus();
+            });
+
+            // 输入框回车提交
+            input1.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitBtn.click();
+                }
+            });
+            
+            input2.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitBtn.click();
+                }
+            });
+
+            // 显示通知
+            function showNotification(message, type = 'info') {
+                // 创建通知元素
+                const notification = document.createElement('div');
+                
+                // 设置通知样式
+                let bgColor, icon;
+                switch(type) {
+                    case 'success':
+                        bgColor = 'bg-green-50 border-green-400 text-green-700';
+                        icon = 'fa-check-circle';
+                        break;
+                    case 'error':
+                        bgColor = 'bg-red-50 border-red-400 text-red-700';
+                        icon = 'fa-exclamation-circle';
+                        break;
+                    case 'warning':
+                        bgColor = 'bg-yellow-50 border-yellow-400 text-yellow-700';
+                        icon = 'fa-exclamation-triangle';
+                        break;
+                    default: // info
+                        bgColor = 'bg-blue-50 border-blue-400 text-blue-700';
+                        icon = 'fa-info-circle';
+                }
+                
+                notification.className = `fixed top-4 right-4 ${bgColor} p-4 rounded-lg shadow-lg flex items-center z-50 transform transition-all duration-300 ease-in-out translate-x-full opacity-0`;
+                notification.innerHTML = `
+                    <i class="fa ${icon} mr-3 text-lg"></i>
+                    <span>${message}</span>
+                `;
+                
+                // 添加到页面
+                document.body.appendChild(notification);
+                
+                // 显示通知
+                setTimeout(() => {
+                    notification.classList.remove('translate-x-full', 'opacity-0');
+                }, 10);
+                
+                // 3秒后隐藏通知
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full', 'opacity-0');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+
+            // 转义HTML特殊字符
+            function escapeHTML(str) {
+                return str
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+        });
+    </script>
+</body>
+</html>
+    
